@@ -1,0 +1,200 @@
+---------------------------------------------
+OSHONSOFT Z80 ASSEMBLER LISTING
+Line   Addr Opcode      Label   Instruction
+---------------------------------------------
+0001   0000             ; Programa en ensamblador Z80 para generar, mostrar y ordenar números pseudo aleatorios
+0002   0000             
+0003   0000              ORG 0000h ;Line modified by ASM preprocessor (ORG correction): ORG 0000h           ; Dirección inicial del programa
+0004   0000             START:
+0005   0000 31 00 40        LD SP, 4000h    ; Inicializar el puntero de la pila
+0006   0003 CD 1B 00        CALL INICIAR    ; Mostrar mensaje de inicio
+0007   0006 CD 22 00        CALL GENERAR_NUMEROS   ; Generar 20 números aleatorios
+0008   0009 CD 2F 00        CALL MOSTRAR_NUMEROS   ; Mostrar números generados
+0009   000C CD 3C 00        CALL PREGUNTAR_ORDEN   ; Preguntar cómo ordenar
+0010   000F CD 5C 00        CALL ORDENAR_NUMEROS   ; Ordenar números
+0011   0012 CD 67 00        CALL MOSTRAR_NUMEROS_ORDENADOS   ; Mostrar números ordenados
+0012   0015 CD 74 00        CALL PREGUNTAR_REPETIR ; Preguntar si repetir o terminar
+0013   0018 C3 00 00        JP START        ; Si repite, reinicia desde el inicio
+0014   001B             
+0015   001B             INICIAR:
+0016   001B                 ; Mostrar el mensaje de inicio
+0017   001B 21 CC 00        LD HL, INICIO_MSG
+0018   001E CD A0 00        CALL MOSTRAR_TEXTO
+0019   0021 C9              RET
+0020   0022             
+0021   0022             GENERAR_NUMEROS:
+0022   0022                 ; Generar 20 números pseudo aleatorios
+0023   0022 06 14           LD B, 20        ; Número de iteraciones
+0024   0024 21 A3 00        LD HL, NUMEROS_GENERADOS ; Puntero al área donde se guardarán los números
+0025   0027             GENERAR_LOOP:
+0026   0027 CD 91 00        CALL RANDOM     ; Llamada a función para generar número pseudo aleatorio
+0027   002A 77              LD (HL), A      ; Guardar el número generado en memoria
+0028   002B 23              INC HL          ; Avanzar al siguiente espacio en memoria
+0029   002C 10 F9           DJNZ GENERAR_LOOP   ; Repetir 20 veces
+0030   002E C9              RET
+0031   002F             
+0032   002F             MOSTRAR_NUMEROS:
+0033   002F                 ; Mostrar los números generados
+0034   002F 21 A3 00        LD HL, NUMEROS_GENERADOS
+0035   0032 06 14           LD B, 20
+0036   0034             MOSTRAR_LOOP:
+0037   0034 7E              LD A, (HL)
+0038   0035 CD A1 00        CALL IMPRIMIR_NUMERO_DECIMAL
+0039   0038 23              INC HL
+0040   0039 10 F9           DJNZ MOSTRAR_LOOP
+0041   003B C9              RET
+0042   003C             
+0043   003C             PREGUNTAR_ORDEN:
+0044   003C                 ; Preguntar al usuario cómo ordenar los números
+0045   003C 21 F2 00        LD HL, PREGUNTA_ORDEN_MSG
+0046   003F CD A0 00        CALL MOSTRAR_TEXTO
+0047   0042 CD A2 00        CALL LEER_TECLADO
+0048   0045 FE 41           CP 'A'          ; Si es 'A', ordenar ascendente
+0049   0047 CA 52 00        JP Z, ORDEN_ASCENDENTE
+0050   004A FE 44           CP 'D'          ; Si es 'D', ordenar descendente
+0051   004C CA 5D 00        JP Z, ORDEN_DESCENDENTE
+0052   004F C3 3C 00        JP PREGUNTAR_ORDEN   ; Si no es válido, preguntar de nuevo
+0053   0052             
+0054   0052             ORDEN_ASCENDENTE:
+0055   0052                 ; Ordenar números de forma ascendente
+0056   0052 21 A3 00        LD HL, NUMEROS_GENERADOS
+0057   0055 11 B7 00        LD DE, NUMEROS_ORDENADOS
+0058   0058 CD 9E 00        CALL BURBUJA_ASC
+0059   005B C9              RET
+0060   005C             
+0061   005C             ORDENAR_NUMEROS:
+0062   005C                 ; Código de ordenamiento aquí
+0063   005C C9              RET
+0064   005D             
+0065   005D             ORDEN_DESCENDENTE:
+0066   005D                 ; Ordenar números de forma descendente
+0067   005D 21 A3 00        LD HL, NUMEROS_GENERADOS
+0068   0060 11 B7 00        LD DE, NUMEROS_ORDENADOS
+0069   0063 CD 9F 00        CALL BURBUJA_DESC
+0070   0066 C9              RET
+0071   0067             
+0072   0067             MOSTRAR_NUMEROS_ORDENADOS:
+0073   0067                 ; Mostrar los números ya ordenados
+0074   0067 21 B7 00        LD HL, NUMEROS_ORDENADOS
+0075   006A 06 14           LD B, 20
+0076   006C             MOSTRAR_ORD_LOOP:
+0077   006C 7E              LD A, (HL)
+0078   006D CD A1 00        CALL IMPRIMIR_NUMERO_DECIMAL
+0079   0070 23              INC HL
+0080   0071 10 F9           DJNZ MOSTRAR_ORD_LOOP
+0081   0073 C9              RET
+0082   0074             
+0083   0074             PREGUNTAR_REPETIR:
+0084   0074                 ; Preguntar si se desea repetir el programa
+0085   0074 21 31 01        LD HL, PREGUNTA_REPETIR_MSG
+0086   0077 CD A0 00        CALL MOSTRAR_TEXTO
+0087   007A CD A2 00        CALL LEER_TECLADO
+0088   007D FE 53           CP 'S'          ; Si es 'S', repetir
+0089   007F CA 00 00        JP Z, START
+0090   0082 FE 4E           CP 'N'          ; Si es 'N', salir
+0091   0084 CA 8A 00        JP Z, TERMINAR
+0092   0087 C3 74 00        JP PREGUNTAR_REPETIR ; Si no es válido, preguntar de nuevo
+0093   008A             
+0094   008A             TERMINAR:
+0095   008A                 ; Mostrar mensaje de salida y finalizar
+0096   008A 21 5A 01        LD HL, SALIDA_MSG
+0097   008D CD A0 00        CALL MOSTRAR_TEXTO
+0098   0090 76              HALT           ; Detener la ejecución
+0099   0091             
+0100   0091             ; Funciones auxiliares
+0101   0091             RANDOM:
+0102   0091                 ; Algoritmo para generar un número pseudo aleatorio
+0103   0091                 ; Esta es una implementación simple de un generador lineal congruente
+0104   0091 3A CB 00        LD A, (RND_SEED)
+0105   0094 21 01 A0        LD HL, 0A001h
+0106   0097 16 75           LD D, 75h
+0107   0099                 ; Aquí deberás implementar la multiplicación manual, ya que no existe MUL
+0108   0099                 ; Como sugerencia, podrías usar sumas repetidas o un algoritmo de bits.
+0109   0099                 ; Por ahora, eliminamos MUL:
+0110   0099                 ; MUL HL, A (reemplazado con algoritmo manual)
+0111   0099 82              ADD A, D
+0112   009A 32 CB 00        LD (RND_SEED), A
+0113   009D C9              RET
+0114   009E             
+0115   009E             BURBUJA_ASC:
+0116   009E                 ; Implementación del algoritmo de ordenamiento de burbuja (ascendente)
+0117   009E C9              RET
+0118   009F             
+0119   009F             BURBUJA_DESC:
+0120   009F                 ; Implementación del algoritmo de ordenamiento de burbuja (descendente)
+0121   009F C9              RET
+0122   00A0             
+0123   00A0             MOSTRAR_TEXTO:
+0124   00A0                 ; Función para mostrar una cadena de texto en la pantalla
+0125   00A0                 ; Código específico del simulador OshonSoft para enviar el texto
+0126   00A0 C9              RET
+0127   00A1             
+0128   00A1             IMPRIMIR_NUMERO_DECIMAL:
+0129   00A1                 ; Función para imprimir el número en formato decimal
+0130   00A1 C9              RET
+0131   00A2             
+0132   00A2             LEER_TECLADO:
+0133   00A2                 ; Función para leer la entrada del teclado
+0134   00A2 C9              RET
+0135   00A3             
+0136   00A3             ; Área de datos
+0137   00A3 00 00 00 00 NUMEROS_GENERADOS:   DEFB 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+0137   00A7 00 00 00 00 
+0137   00AB 00 00 00 00 
+0137   00AF 00 00 00 00 
+0137   00B3 00 00 00 00 
+0138   00B7 00 00 00 00 NUMEROS_ORDENADOS:   DEFB 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+0138   00BB 00 00 00 00 
+0138   00BF 00 00 00 00 
+0138   00C3 00 00 00 00 
+0138   00C7 00 00 00 00 
+0139   00CB 01          RND_SEED:            DEFB 0x01 ; Semilla inicial del generador aleatorio
+0140   00CC             
+0141   00CC             ; Mensajes de texto
+0142   00CC 49 6E 69 63 INICIO_MSG:          DB 'Iniciando la generacion de numeros...', 0
+0142   00D0 69 61 6E 64 
+0142   00D4 6F 20 6C 61 
+0142   00D8 20 67 65 6E 
+0142   00DC 65 72 61 63 
+0142   00E0 69 6F 6E 20 
+0142   00E4 64 65 20 6E 
+0142   00E8 75 6D 65 72 
+0142   00EC 6F 73 2E 2E 
+0142   00F0 2E 00       
+0143   00F2 43 6F 6D 6F PREGUNTA_ORDEN_MSG:  DB 'Como deseas ordenar los numeros? (A=Ascendente, D=Descendente)', 0
+0143   00F6 20 64 65 73 
+0143   00FA 65 61 73 20 
+0143   00FE 6F 72 64 65 
+0143   0102 6E 61 72 20 
+0143   0106 6C 6F 73 20 
+0143   010A 6E 75 6D 65 
+0143   010E 72 6F 73 3F 
+0143   0112 20 28 41 3D 
+0143   0116 41 73 63 65 
+0143   011A 6E 64 65 6E 
+0143   011E 74 65 2C 20 
+0143   0122 44 3D 44 65 
+0143   0126 73 63 65 6E 
+0143   012A 64 65 6E 74 
+0143   012E 65 29 00    
+0144   0131 44 65 73 65 PREGUNTA_REPETIR_MSG: DB 'Deseas repetir el programa? (S=Si, N=No)', 0
+0144   0135 61 73 20 72 
+0144   0139 65 70 65 74 
+0144   013D 69 72 20 65 
+0144   0141 6C 20 70 72 
+0144   0145 6F 67 72 61 
+0144   0149 6D 61 3F 20 
+0144   014D 28 53 3D 53 
+0144   0151 69 2C 20 4E 
+0144   0155 3D 4E 6F 29 
+0144   0159 00          
+0145   015A 53 61 6C 69 SALIDA_MSG:          DB 'Saliendo del programa...', 0
+0145   015E 65 6E 64 6F 
+0145   0162 20 64 65 6C 
+0145   0166 20 70 72 6F 
+0145   016A 67 72 61 6D 
+0145   016E 61 2E 2E 2E 
+0145   0172 00          
+0146   0173             
+0147   0173             END
+Number of errors = 0
